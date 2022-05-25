@@ -1,364 +1,233 @@
 
+* Table of contents                               :toc_2:noexport:
+- [[#introduction][Introduction]]
+  - [[#use][Use]]
+  - [[#contribute][Contribute]]
+- [[#details][Details]]
+  - [[#use-1][Use]]
+  - [[#build][Build]]
+- [[#cite][Cite]]
+  - [[#datalad][Datalad]]
 
-* Template Name
-
-Optional text description
-
-** Metadata
-
-#+NAME: datalad-meta
-#+BEGIN_SRC python :results output verbatim drawer :exports results
-import json
-
-with open("meta.json") as file:
-    data = json.load(file)
-
-for item in data:
-    if item[0] == '@': continue
-    print('|', item, '|', data[item], '|')
-#+END_SRC
-
-#+RESULTS: datalad-meta
-:results:
-| name              | Template data  |
-| science reference | Paper citation |
-| science DOI       | doi:           |
-| data DOI          | doi:           |
-| data URL          | https://       |
-| keywords          | foo, bar       |
-:end:
-
-
-** Create dataset
-:PROPERTIES:
-:CUSTOM_ID: ceate-data
-:END:
-
-+ Remove the following text, or replace with explanation of how datalad dataset is created
-+ Replace the =bash= block with =python= or other preferred language
-+ Keep the =#+NAME: datalad-create= name so that these blocks can be called via script
-
-#+NAME: datalad-create
-#+BEGIN_SRC bash
-# datalad create -f -d . -c text2git -D "Template"
-datalad create -f -d . -D "Cryo data template"
-git add meta.json README.org
-git commit -m "README & metadata"
-git branch -M main
-
-git remote add origin git@github.com:cryo-data/template.git
-git push -u origin main
-
-
-#+END_SRC
-
-** How to use this template
-:PROPERTIES:
-:CUSTOM_ID: how-to-use-this-template
-:END:
-
-+ Pick a name for the new dataset
-  + Folder name should be "Author_YYYY" if possible, or some other common name for the dataset (e.g. =ArcticDEM= or =MEaSUREs.0471=)
-  + In this example, we'll use =Mankoff_2020=, and convert https://dataverse01.geus.dk/dataset.xhtml?persistentId=doi:10.22008/promice/data/ice_discharge/d/v02 to a datalad dataset.
-
-+ Copy template to clean directory using the new dataset name
-
-#+BEGIN_SRC bash
-dest="Mankoff_2020"
-git clone https://github.com/cryo-data/template.git ${dest}
-cd ${dest}
-#+END_SRC
-
-+ Set up a new repository, ideally under the [[https://github.com/cryo-data][cryo-data portal on GitHub]], but can be hosted anywhere.
-  + Set up by visiting https://github.com/organizations/cryo-data/repositories/new and do **not** initialize with any files, then:
-
-#+BEGIN_SRC bash
-git remote rm origin
-git remote add origin git@github.com:cryo-data/${dest}.git
-git branch -M main
-git push -u origin main
-#+END_SRC
-
-+ Populate the datalad dataset 
-  + NOTE :: The code below should go into the [[#create-data][create data]] section above.
-
-The code below downloads each file using ~datalad download-url~. This is one of many ways to populate a dalatad dataset.
-
-+ TODO: Show examples for adding data that is accessible via an archive (Zenodo?) or data already in git.
-+ TODO: Provide small shell or Python script in template folder for traversing and downloading remote directory structure (e.g. =wget -r ...=).
-
-#+BEGIN_SRC bash
-export SERVER=https://dataverse01.geus.dk
-export DOI=10.22008/promice/data/ice_discharge/d/v02
-
-curl ${SERVER}/api/datasets/:persistentId?persistentId=doi:${DOI} > dv.json
-cat dv.json | tr ',' '\n' | grep -E '"persistentId"' | cut -d'"' -f4 > urls.txt
-while read -r PID; do
-  datalad download-url $SERVER/api/access/datafile/:persistentId?persistentId=${PID}
-done < urls.txt
-rm dv.json urls.txt # cleanup
-#+END_SRC
-
-+ Push changes
-
-#+BEGIN_SRC bash
-# git push
-datalad push
-#+END_SRC
-
-+ Remove [[#how-to-use-this-template][this section]] from the [[./README.org]] file.
-
-* Example: use
-
-The following code builds a small datalad repository containing (most of) the following five datasets:
-
-+ https://doi.org/10.1594/PANGAEA.762898
-+ https://doi.org/10.22008/FK2/OHI23Z
-+ https://doi.org/10.22008/FK2/3BVF9V
-+ https://doi.org/10.7280/D1FH5D
-+ https://doi.org/10.5067/DC0MLBOCL3EL
-
-Not all files are included to save time. If including all files, rather than hard-coding the URLs as shown below, we might loop over the output from a ~wget~ spider command that discovers all of the URLs recursively.
-
-Building the repository takes more work. The code to use it is shorter, and therefore shown first.
+* Introduction
 
 ** Use
-#+BEGIN_SRC bash
-mkdir -p ~/tmp/datalad/
-cd ~/tmp/datalad
-# cleanup
-trash test-datalad-kdm
-datalad clone git@github.com:cryo-data/test-datalad-kdm.git
-cd test-datalad-kdm
-datalad get mankoff_2021 # Fetch the files
-#+END_SRC
-* Example: build
-** RESET
-#+BEGIN_SRC bash
-cd ~/projects/cryo-data
-gh repo delete https://github.com/cryo-data/test-datalad-kdm
-trash test-datalad-kdm
-#+END_SRC
-
-** Top level: test-datalad-kdm 
 
 #+BEGIN_SRC bash
-cd ~/projects/cryo-data
-mkdir test-datalad-kdm
-cd test-datalad-kdm
-conda activate datalad
-datalad create -f -D 'cryo-data top-level dataset' .
-echo "Hello world" >> README.org
-git add README.org
-git commit -m "Add README.org"
-
-gh repo create --public -d 'cryo-data top-level dataset' cryo-data/test-datalad-kdm
-git remote add origin git@github.com:cryo-data/test-datalad-kdm.git
-git push -u origin main
-datalad push
-#+END_SRC
-
-** Mankoff 2021 / PROMICE TMB
-
-Dataset:
-+ https://dataverse01.geus.dk/dataset.xhtml?persistentId=doi:10.22008/FK2/OHI23Z
-  + https://dataverse01.geus.dk/api/access/datafile/:persistentId?persistentId=doi:10.22008/FK2/OHI23Z/MUKBIZ
-  + https://dataverse01.geus.dk/api/access/datafile/:persistentId?persistentId=doi:10.22008/FK2/OHI23Z/JMJWHR
-  + https://dataverse01.geus.dk/api/access/datafile/:persistentId?persistentId=doi:10.22008/FK2/OHI23Z/BSNFRZ
-  + https://dataverse01.geus.dk/api/access/datafile/:persistentId?persistentId=doi:10.22008/FK2/OHI23Z/NHVCLK
-
-#+BEGIN_SRC bash
-cd ~/projects/cryo-data
-
-datalad create -D "PROMICE TMB (Mankoff 2021)" mankoff_2021
-cd mankoff_2021
-
-ROOT="https://dataverse01.geus.dk/api/access/datafile/:persistentId?persistentId=doi:"
-for doi in 10.22008/FK2/OHI23Z/MUKBIZ 10.22008/FK2/OHI23Z/JMJWHR 10.22008/FK2/OHI23Z/BSNFRZ 10.22008/FK2/OHI23Z/NHVCLK; do
-  datalad download-url -m "Download sample data"  "${ROOT}${doi}"
-done
-
-gh repo create --public -d 'PROMICE TMB (Mankoff, 2021)' cryo-data/mankoff_2021
-git remote add origin git@github.com:cryo-data/mankoff_2021.git
-# git branch -M main
-git push -u origin main
-datalad push
-#+END_SRC
-
-Add mankoff_2021 as sub-dataset to test-datalad-kdm
-
-#+BEGIN_SRC bash
-cd ~/projects/cryo-data/test-datalad-kdm
-datalad install -d . https://github.com/cryo-data/mankoff_2021.git
-datalad save -m "Added mankoff_2021"
-datalad push
-#+END_SRC
-
-** Colgan 2021 / PROMICE Geothermal
-
-Dataset:
-+ https://doi.org/10.22008/FK2/3BVF9V
-  + https://dataverse01.geus.dk/api/access/datafile/:persistentId?persistentId=doi:10.22008/FK2/3BVF9V/GTLNJZ
-  + https://dataverse01.geus.dk/api/access/datafile/:persistentId?persistentId=doi:10.22008/FK2/3BVF9V/SDYTU6
-  + https://dataverse01.geus.dk/api/access/datafile/:persistentId?persistentId=doi:10.22008/FK2/3BVF9V/ZPUNPU
-  + https://dataverse01.geus.dk/api/access/datafile/:persistentId?persistentId=doi:10.22008/FK2/3BVF9V/P1EZ5H 
-
-#+BEGIN_SRC bash
-cd ~/projects/cryo-data
-
-datalad create -D "PROMICE Geothermal (Colgan 2021)" colgan_2021
-cd colgan_2021
-
-ROOT="https://dataverse01.geus.dk/api/access/datafile/:persistentId?persistentId=doi:"
-for doi in 10.22008/FK2/3BVF9V/GTLNJZ 10.22008/FK2/3BVF9V/SDYTU6 10.22008/FK2/3BVF9V/ZPUNPU 10.22008/FK2/3BVF9V/P1EZ5H; do 
-  datalad download-url -m "Download sample data"  "${ROOT}${doi}"
-done
-
-gh repo create --public -d 'PROMICE Geothermal (Colgan, 2021)' cryo-data/colgan_2021
-git remote add origin git@github.com:cryo-data/colgan_2021.git
-# git branch -M main
-git push -u origin main
-datalad push
-#+END_SRC
-
-Add colgan_2021 as sub-dataset to test-datalad-kdm
-
-#+BEGIN_SRC bash
-cd ~/projects/cryo-data/test-datalad-kdm
-datalad install -d . https://github.com/cryo-data/colgan_2021.git
-datalad save -m "Added colgan_2021"
-datalad push
-#+END_SRC
-
-** Rennermalm PANGAEA
-
-#+BEGIN_SRC bash
-cd ~/projects/cryo-data
-
-FOLDER="10.1594_SLASH_pangaea.762898"
-datalad create -D "River discharge AK-005-001" ${FOLDER}
-cd ${FOLDER}
-
-datalad download-url -m "Download sample data"  https://doi.pangaea.de/10.1594/PANGAEA.762898?format=textfile
-
-gh repo create --public -d 'River discharge AK-005-001' cryo-data/${FOLDER}
-git remote add origin git@github.com:cryo-data/${FOLDER}.git
-git push -u origin main
-datalad push
-#+END_SRC
-
-Add as sub-dataset to test-datalad-kdm
-
-#+BEGIN_SRC bash
-cd ~/projects/cryo-data/test-datalad-kdm
-datalad install -d . https://github.com/cryo-data/${FOLDER}.git
-datalad save -m "Added Rennermalm Pangaea river discharge data"
-datalad push
-#+END_SRC
-
-
-** CALFIN
-
-#+BEGIN_SRC bash
-cd ~/projects/cryo-data
-
-FOLDER="CALFIN"
-datalad create -D "CALFIN: Calving front dataset for East/West Greenland, 1972-2019" ${FOLDER}
-cd ${FOLDER}
-
-datalad download-url -m "User Guide" https://datadryad.org/stash/downloads/file_stream/458635
-datalad download-url -m "Level 0 domains" https://datadryad.org/stash/downloads/file_stream/458628
-datalad download-url -m "Level 0 fjord boundaries" https://datadryad.org/stash/downloads/file_stream/458634
-datalad download-url -m "Level 0 scene list" https://datadryad.org/stash/downloads/file_stream/458633
-
-gh repo create --public -d 'CALFIN' cryo-data/${FOLDER}
-git remote add origin git@github.com:cryo-data/${FOLDER}.git
-git push -u origin main
-datalad push
-#+END_SRC
-
-Add as sub-dataset to test-datalad-kdm
-
-#+BEGIN_SRC bash
-cd ~/projects/cryo-data/test-datalad-kdm
-datalad install -d . https://github.com/cryo-data/${FOLDER}.git
-datalad save -m "Added CALFIN"
-datalad push
-#+END_SRC
-
-
-
-** MEaSURES 0642 v1
-
-#+BEGIN_SRC bash
-cd ~/projects/cryo-data
-
-FOLDER="NSIDC_0642"
-datalad create -D "MEaSUREs Annual Greenland Outlet Glacier Terminus Positions from SAR Mosaics, Version 1" ${FOLDER}
-cd ${FOLDER}
-
-
-for ext in cpg dbf prj sbn sbx shp shx xml; do
-  datalad download-url -m "NSIDC 0642" https://n5eil01u.ecs.nsidc.org/MEASURES/NSIDC-0642.001/2000.09.30/GlacierIDs_v01.2.${ext}
-done
-
-gh repo create --public -d 'Moon 2008' cryo-data/${FOLDER}
-git remote add origin git@github.com:cryo-data/${FOLDER}.git
-git push -u origin main
-datalad push
-#+END_SRC
-
-Add as sub-dataset to test-datalad-kdm
-
-#+BEGIN_SRC bash
-cd ~/projects/cryo-data/test-datalad-kdm
-datalad install -d . https://github.com/cryo-data/${FOLDER}.git
-datalad save -m "Added Moon 2008"
-datalad push
-#+END_SRC
-
-
-
-
-** NOTDONE BedMachine v4
-
-#+BEGIN_SRC bash
-cd ~/projects/cryo-data
-datalad remove --if-dirty save-before BedMachine
-datalad create -D "BedMachine (Morlighem 2017)" BedMachine
-cd BedMachine
-
-# rm ~/.config/datalad/providers/*
-# rm ~/.config/datalad/cookies*
-# trash ~/.cache/datalad
-
-datalad download-url -m "Download BedMachine" "https://n5eil01u.ecs.nsidc.org/ICEBRIDGE/IDBMG4.004/1993.01.01/BedMachineGreenland-2021-04-20.nc.xml"
-datalad download-url -m "Download BedMachine" "https://n5eil01u.ecs.nsidc.org/ICEBRIDGE/IDBMG4.004/1993.01.01/BedMachineGreenland-2021-04-20.nc"
-
-gh repo create --public -d 'BedMachine (Morlighem 2017)' cryo-data/BedMachine
-# git branch -M main
-git push -u origin main
-datalad save -m "Added BedMachine v4"
-datalad push
-#+END_SRC
-
-add to cryo-data as sub-dataset
-
-#+BEGIN_SRC bash
-cd ~/projects/cryo-data/cryo-data
-datalad install -d . https://github.com/cryo-data/BedMachine.git
-datalad push
-#+END_SRC
-
-testing
-
-#+BEGIN_SRC bash
-cd ~/tmp/datalad
-trash *
-datalad install -r https://github.com/cryo-data/cryo-data.git
+git clone https://github.com/cryo-data/cryo-data # install this repository
 cd cryo-data
-datalad get -r *
+./cryo-data.sh . # install datalad datasets
+#+END_SRC
+
+When you find a specific file you want to actually download and use, then
+
+#+BEGIN_SRC bash
+datalad get path/to/file
+datalad get -r author/someone_yyyy # example
+#+END_SRC
+
+See https://docs.datalad.org/en/stable/generated/man/datalad-get.html for more details.
+
+To free up space after downloading files, use =datalad drop=. See https://docs.datalad.org/en/stable/generated/man/datalad-drop.html.
+
+** Contribute
+
+A dataset can be contributed in a variety of different ways, ranging from an email asking for inclusion, to pull requests on final products. Requirements for inclusion are:
+
+*** Minimum contribution
+
++ URL of the folder or data files.
++ Data must be publicly available via FTP, HTTP, or other common protocols
++ Metadata, similar to the following table.
++ 
+| cryo-data name | some_descriptive_name                |
+| DOI            | 10.xxxx/nnnn                         |
+| author         | author_yyyy                          |
+| project        | MEasURES/some_other_descriptive_name |
+| product        | BedMachine                           |
+| repository     | NSIDC/424242                         |
+| misc           | only_if_other_fields_empty           |
+
++ Our metadata standards and requirements are subject to change, but for this first version,
+  + =cryo-data name= is required. Some descriptive name or random character string. This name must be a valid filename acceptable to both modern OSes (e.g. cannot include forward-slash, which is a folder separator) and to GitHub as a repository name.
+  + No other fields are required, but they do make data discovery easier.
+
+* Details
+
+** Use
+
+Usage is wrapped in the [[./cryo-data.sh]] script. This script performs two tasks. 1) Download and install the cryo-data db and 2) Build links using the metadata so that data is easier to browse and find.
+
+The cryo-data db is downloaded with:
+
+#+BEGIN_SRC bash
+datalad clone https://github.com/cryo-data/db # fetch database
+cd db
+datalad get -rn * # get links to all the files (not the actual data)
+datalad get -r # get ALL THE DATA - probably not a good idea
+#+END_SRC
+
++ After fetching the =db=, links into the db are generated using each datasets metadata.
++ These links organize datasets by =author=, =project=, =product=, =repository=, =org=, and =misc=.
+  + The same dataset may appear in multiple locations for ease of access
+  + It does not take up additional disk space
++ The final cryo-data archive may look something like:
+
+#+BEGIN_SRC
+$ tree -d
+.
+├── db        # top level database
+│   ├── some_dataset
+│   ├── some_other_datasat
+├── author    # datasets organized by author
+│   ├── some_yyyy # same as db/some_dataset
+│   └── other_yyyy
+├── org
+│   └── NSIDC
+│       └── nnnn # same as db/some_dataset
+├── project
+│   └── MEaSURES
+│       └── really_long_name_describing_product # same as db/some_dataset
+└── repository
+    ├── NSIDC
+    │   └── nnnn # same as db/some_dataset
+    └── pangaea
+        └── 424242 # same as db/some_other_dataset
+#+END_SRC
+
+** Build
+
+*** Steps
+
+A new dataset is ingested using the following general steps:
+1. Download
+   1. A new datalad empty dataset is created
+   2. Datalad is used to download data
+2. Upload
+   1. The datalad dataset is uploaded to GitHub (that is, not the data, just the references to its original location)
+3. Configure
+   1. The datalad dataset is downloaded into the development db =db.dev=
+   2. The updated =db.dev= is pushed to GitHub
+
+In more detail...
+
+*** Setup
+
+An =intake= folder is created for each dataset, containing two files:
+
+1. cryo-data.meta
+
+#+BEGIN_SRC bash :exports results :results verbatim
+cat template/cryo-data.meta
+#+END_SRC
+
+#+RESULTS:
+: cryo-data name| template
+: DOI | 
+: author | author_yyyy
+: project | 
+: product | 
+: repository | 
+: misc | template
+
+2. cryo-data-download.{sh,py}
+
+#+BEGIN_SRC bash :exports results :results verbatim
+cat template/cryo-data-download.sh
+#+END_SRC
+
+#+RESULTS:
+: #!/usr/bin/env bash
+: 
+: # can be more involved, e.g. wrapping download-url in a wget spyder
+: # See also https://docs.datalad.org/en/stable/generated/man/datalad-addurls.html
+: datalad download-url https://filesamples.com/samples/document/txt/sample1.txt
+: 
+
+*** Download
+
++ A new datalad empty dataset is created
++ Datalad is used to download data (via the cryo-data-download.{sh,py} scripts)
+
+#+BEGIN_SRC bash
+log_info "Building dataset"
+datalad create -d . -D "template" --force
+git add cryo-data.meta cryo-data-download.sh # should maybe be in ".cryo-data" sub-folder?
+git commit cryo-data.meta cryo-data-download.sh -m "cryo-data meta and download"
+if [[ -e cryo-data-download.sh ]]; then ./cryo-data-download.sh; fi
+if [[ -e cryo-data-download.py ]]; then ./cryo-data-download.py; fi
+#+END_SRC
+
+*** Upload
+
++ The datalad dataset is uploaded to GitHub (that is, not the data, just the references to its original location)
+
+#+BEGIN_SRC bash
+name=$(grep "^cryo-data name" cryo-data.meta | cut -d"|" -f2 | tr -d " ")
+gh repo create --public -d "${name}" cryo-data/${name}
+git remote add origin git@github.com:cryo-data/${name}
+git push -u origin main
+datalad push
+#+END_SRC
+
+*** Configure
+
++ The datalad dataset is downloaded into the development db =db.dev=
++ The updated =db.dev= is pushed to GitHub
+
+#+BEGIN_SRC bash
+cd ./db.dev
+datalad clone -D $name https://github.com/cryo-data/${name}
+datalad save -r
+datalad push --to origin
+#+END_SRC
+
+*** Use
+
+As above, the dataset is used with:
+
+#+BEGIN_SRC bash
+datalad clone https://github.com/cryo-data/db # fetch database
+cd db
+datalad get -rn * # get links to all the files (not the actual data)
+#+END_SRC
+
+The links are build using the =cryo-data.meta= fields for each dataset, and =datalad clone=, from the local =db=.
+
+#+BEGIN_SRC bash
+for ds in ${dir}/db/*; do
+  for target in author project product repository org misc; do
+    dest=$(grep "^${target}" ${ds}/cryo-data.meta | cut -d"|" -f2 | tr -d " ") || echo ""
+    if [[ ${dest} == "" ]]; then continue; fi # no destination for this target.
+    if [[ -e ${target}/${dest} ]]; then continue; fi # already built
+    datalad clone ${ds} ${target}/${dest}
+  done
+done
 #+END_SRC
 
 
-
+* Cite
+** Datalad
+#+BEGIN_EXAMPLE
+@article{halchenko_2021,
+  author    = {Halchenko, Yaroslav and Meyer, Kyle and Poldrack, Benjamin and Solanky, Debanjum and
+                  Wagner, Adina and Gors, Jason and MacFarlane, Dave and Pustina, Dorian and Sochat,
+                  Vanessa and Ghosh, Satrajit and Mönc, Christian and Markiewicz, Christopher J. and
+                  Waite, Laura and Shlyakhter, Ilya and de la Vega, Alejandro and Hayashi, Soichi
+                  and Häusler, Christian Olaf and Poline, Jean-Baptiste and Kadelka, Tobias and
+                  Skytén, Kusti and Jarecka, Dorota and Kennedy, David and Strauss, Ted and Cieslak,
+                  Matt and Vavra, Peter and Ioanas, Horea-Ioan and Schneider, Robin and Pflüger,
+                  Mika and Haxby, James V. and Eickhoff, Simon B. and Hanke, Michael},
+  title	    = {DataLad: distributed system for joint management of code, data, and their
+                  relationship},
+  journal   = {Journal of Open Source Software},
+  year	    = 2021,
+  volume    = 6,
+  number    = 63,
+  pages	    = 3262,
+  month	    = {Jul},
+  ISSN	    = {2475-9066},
+  url	    = {http://dx.doi.org/10.21105/joss.03262},
+  DOI	    = {10.21105/joss.03262},
+  publisher = {The Open Journal}}
+#+END_EXAMPLE
