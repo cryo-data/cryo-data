@@ -26,7 +26,7 @@ To access the data, you need to install [[https://www.datalad.org/][datalad]].
 
 + Linux
   + =sudo apt install datalad= is the easiest way, but may give an older version
-  + =conda install datalad= or something similar in your favorite Python environment manager will provide the latest version
+  + =conda install datalad=, or =mamba install datalad= (just like conda, but in C++ hence much faster), or something similar in your favorite Python environment manager will provide the latest version
 + OS X
   + TODO
 + Windows
