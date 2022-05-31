@@ -32,8 +32,10 @@ for aka in $(yq '.aka | keys' ./template/cryo-data.yaml | cut -d" " -f2); do
   if [[ -d ${aka} ]]; then
     log_info "${aka} found"
   else
-    log_warn "${aka} not found. Cloning..."
-    datalad clone git@github.com:cryo-data/${aka} ./${aka}
+    # log_warn "${aka} not found. Cloning..."
+    # datalad clone -d . git@github.com:cryo-data/${aka} ./${aka}
+    log_warn "${aka} not found. Installing..."
+    datalad install -d . git@github.com:cryo-data/${aka} ./${aka}
     ## Create
     # log_warn "${aka} not found. Creating..."
     # datalad create -D "cryo-data ${aka}" ./${aka}

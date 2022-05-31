@@ -2,19 +2,3 @@
 	path = database
 	url = https://github.com/cryo-data/database
 	datalad-id = 9cf0f155-b5c7-4d51-b0ee-708e65f50b3b
-[submodule "intake/10.1594.762898"]
-	path = intake/10.1594.762898
-	url = git@github.com:cryo-data/rennermalm_river_discharge_AK-05-001
-	datalad-id = 5b516fac-eb59-43ad-ad89-d6019445eb72
-[submodule "intake/10.5067___SLASH___DC0MLBOCL3EL"]
-	path = intake/10.5067___SLASH___DC0MLBOCL3EL
-	url = git@github.com:cryo-data/moon_2008_NSIDC_0642
-	datalad-id = 1242ba12-90ae-4ac2-ac17-5a4b04f15b3c
-[submodule "intake/10.1594.762898"]
-	path = intake/10.1594.762898
-	url = git@github.com:cryo-data/rennermalm_river_discharge_AK-05-001
-	datalad-id = 5b516fac-eb59-43ad-ad89-d6019445eb72
-[submodule "intake/10.5067___SLASH___DC0MLBOCL3EL"]
-	path = intake/10.5067___SLASH___DC0MLBOCL3EL
-	url = git@github.com:cryo-data/moon_2008_NSIDC_0642
-	datalad-id = 1242ba12-90ae-4ac2-ac17-5a4b04f15b3c
