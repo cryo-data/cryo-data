@@ -2,3 +2,7 @@
 	path = database
 	url = https://github.com/cryo-data/database
 	datalad-id = 9cf0f155-b5c7-4d51-b0ee-708e65f50b3b
+[submodule "data_provider/pangaea/762898"]
+	path = data_provider/pangaea/762898
+	url = https://github.com/cryo-data/rennermalm_river_discharge_AK-05-001
+	datalad-id = 5b516fac-eb59-43ad-ad89-d6019445eb72
