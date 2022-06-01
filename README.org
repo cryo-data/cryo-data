@@ -4,6 +4,7 @@
 - [[#instructions][Instructions]]
   - [[#install-datalad][Install datalad]]
   - [[#use][Use]]
+  - [[#contribute][Contribute]]
 - [[#cite][Cite]]
   - [[#datalad][Datalad]]
 
@@ -47,6 +48,11 @@ datalad get -r cryo-data/data_provider/NSIDC/0642/
 See https://docs.datalad.org/en/stable/generated/man/datalad-get.html for more details.
 
 To free up space after downloading files, use =datalad drop=. See https://docs.datalad.org/en/stable/generated/man/datalad-drop.html.
+
+
+** Contribute
+
+See [[./CONTRIBUTING.org]]
 
 
 * Cite
