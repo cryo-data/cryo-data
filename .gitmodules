@@ -7,3 +7,8 @@
 	url = git@github.com:cryo-data/author
 	datalad-id = 8150df2c-24cb-4cfd-9609-1dcd3cbcf7a6
 	datalad-url = git@github.com:cryo-data/author
+[submodule "data_provider"]
+	path = data_provider
+	url = git@github.com:cryo-data/data_provider
+	datalad-id = 8cb3661d-431f-494c-b8a2-30f51bbbaed5
+	datalad-url = git@github.com:cryo-data/data_provider
