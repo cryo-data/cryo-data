@@ -1,0 +1,13 @@
+cryo_data_name: descriptive_name_or_path_clean_DOI
+references:
+  data:
+    doi: nn.nnnn/nnn-nnn-nnnnn
+  science:
+    doi: nn.nnn/nnn-nnnn-nnnnnn
+
+aka:
+  author: author_yyyy
+  data_provider: name/dataset_id_or_doi
+  organization: name/dataset_name
+  project: dataset_name
+  other:
