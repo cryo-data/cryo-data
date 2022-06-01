@@ -33,6 +33,7 @@ To access the data, you need to install [[https://www.datalad.org/][datalad]].
 
 ** Use
 
+*** First use
 To download the complete cryo-data data set as 'empty' files:
 #+BEGIN_SRC bash
 datalad install -r https://github.com/cryo-data/cryo-data
@@ -46,6 +47,16 @@ datalad get -r cryo-data/data_provider/NSIDC/0642/
 #+END_SRC
 
 See https://docs.datalad.org/en/stable/generated/man/datalad-get.html for more details.
+
+*** Updates
+
+The following command merges in all new updates, and the =-r= option does this recursively through all child datasets.
+
+#+BEGIN_SRC bash
+datalad update --merge -r .
+#+END_SRC
+
+*** Remove downloaded files
 
 To free up space after downloading files, use =datalad drop=. See https://docs.datalad.org/en/stable/generated/man/datalad-drop.html.
 
