@@ -1,1 +1,6 @@
-../.git/annex/objects/08/Xq/MD5E-s249--72e95c1c22a1f98068d68288c2ab4e72.sh/MD5E-s249--72e95c1c22a1f98068d68288c2ab4e72.sh
+#!/usr/bin/env bash
+
+# can be more involved, e.g. wrapping download-url in a wget spyder
+# See also https://docs.datalad.org/en/stable/generated/man/datalad-addurls.html
+datalad download-url https://filesamples.com/samples/document/txt/sample1.txt
+
