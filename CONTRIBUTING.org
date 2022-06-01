@@ -1,0 +1,210 @@
+* Table of contents                               :toc_3:noexport:
+- [[#minimum-contribution][Minimum contribution]]
+- [[#details][Details]]
+  - [[#outline-of-steps][Outline of steps]]
+  - [[#setup][Setup]]
+    - [[#cryo-datayaml][cryo-data.yaml]]
+    - [[#cryo-data-downloadshpyext][cryo-data-download.{sh,py,ext}]]
+  - [[#download][Download]]
+  - [[#upload][Upload]]
+  - [[#configure][Configure]]
+
+* Minimum contribution
+
++ URL of the folder or data files.
++ Data must be publicly available via FTP, HTTP, or other common protocols
++ Metadata, similar to the following (YAML format)
+
+#+BEGIN_SRC yaml :exports code
+cryo_data_name: something_descriptive
+references:
+  data:
+    doi: nn.nnnn/nnnn-nnn-nnnn
+  science:
+    doi: mm.mmmm/m-mmm-m
+
+aka:
+  author: someone_yyyy
+  data_provider: pangaea/424242
+  organization: GEUS/AWS_data
+  project: MEasURES/ice_velocity_from_satellite_version_V
+  other: something_descriptive_if_no_other_akas
+#+END_SRC
+
++ Our metadata standards and requirements are subject to change, but for this first version,
+  + =cryo-data name= is required. Some descriptive name or random character string. This name must be a valid filename acceptable to both modern OSes (e.g. cannot include forward-slash, which is a folder separator) and to GitHub as a repository name.
+  + No other fields are required, but they do make data discovery easier.
+
+
+* Details
+
+** Outline of steps
+
+A new dataset is ingested using the following general steps:
+1. Download
+   1. A new datalad empty dataset is created
+   2. Datalad is used to create links to the remote data
+2. Upload
+   1. The datalad dataset is uploaded to GitHub (not the data, just the references to its original location)
+3. Configure
+   1. The datalad dataset is downloaded into the =database= where all datasets reside
+   2. The datalad dataset is downloaded into each of the akas specified in its metadata
+   3. The updated =database= and aka folders are pushed to GitHub
+
+
+Scripts to help with =download=, =upload=, and =configure= are in the [[https://github.com/cryo-data/bin][cryo-data/bin]] repository.
+
+In more detail...
+
+** Setup
+
+An =intake= folder is created for each dataset, containing two files:
+1. cryo-data.yaml
+2. cryo-data-download.{sh,py,ext}
+
++ Note :: It seems to work best if =intake= is not inside the cryo-data folder. This work should be done outside of the cryo-data git and datalad tree.
++ Note :: The [[./template]] folder can be used as a starting point.
+  
+*** cryo-data.yaml
+
+#+BEGIN_SRC bash :exports results :results verbatim
+cat template/cryo-data.yaml
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+cryo_data_name: descriptive_name_or_path_clean_DOI
+references:
+  data:
+    doi: nn.nnnn/nnn-nnn-nnnnn
+    bib: |-
+      @article{author_yyyy,
+        doi = {nnn/nnn-nnnnn},
+        year = {yyyy},
+        month = nn,
+        publisher = {Publisher},
+        volume = {42},
+        number = {42},
+        pages = {42},
+        author = {Last, First and Else, Someone}
+        title = {{T}itle with {F}ormatting}},
+        journal = {journal}
+      }
+  science:
+    doi: nn.nnn/nnn-nnnn-nnnnnn
+    bib:
+
+aka:
+  author: author_yyyy
+  data_provider: name/dataset_id_or_doi
+  organization: name/dataset_name
+  project: dataset_name
+  other:
+#+end_example
+
+*** cryo-data-download.{sh,py,ext}
+
+A shell or python (or any other language) script that can call the appropriate datalad commands to download the data.
+
+#+BEGIN_SRC bash :exports results :results verbatim
+cat template/cryo-data-download.sh
+#+END_SRC
+
+#+RESULTS:
+: #!/usr/bin/env bash
+: 
+: # can be more involved, e.g. wrapping download-url in a wget spyder
+: # See also https://docs.datalad.org/en/stable/generated/man/datalad-addurls.html
+: datalad download-url https://filesamples.com/samples/document/txt/sample1.txt
+
+A more complicate example uses =wget= with login credentials to spider an NSIDC dataset with nested folders, then downloads each of the files preserving a specific folder level. The script is:
+#+BEGIN_SRC bash
+#!/usr/bin/env bash
+
+# spider and save all output
+wget --load-cookies ~/.urs_cookies --save-cookies ~/.urs_cookies --keep-session-cookies --no-check-certificate --auth-no-challenge=on -r -np -e robots=off --spider --force-html -nH --cut-dirs=2 https://n5eil01u.ecs.nsidc.org/MEASURES/NSIDC-0642.001/ > stdout.txt 2> stderr.txt
+
+# Extract the URLs from the output, and the desired filename for each URL
+echo "url,file" > urls.txt
+for url in $(grep '^--' stderr.txt | awk '{ print $3 }' | grep -v '\(\/?\|\/$\)' | sort | uniq); do
+  echo $url,$(echo $url| cut -d"/" -f6-) >> urls.txt
+done
+
+# import into datalad (--dry-run?)
+datalad addurls --nosave --fast urls.txt '{url}' '{file}'
+
+# cleanup
+rm stderr.txt stdout.txt urls.txt
+#+END_SRC
+
+And the output of this is something like the following (here showing only =.shp= files for brevity)
+#+begin_example
+./2000.09.30/GlacierIDs_v01.2.shp
+./2000.09.30/termini_0001_v01.2.shp
+./2005.12.24/termini_0506_v01.2.shp
+./2006.12.30/termini_0607_v01.2.shp
+./2007.11.22/termini_0708_v01.2.shp
+./2009.01.10/termini_0809_v01.2.shp
+./2013.01.15/termini_1213_v01.2.shp
+./2015.01.21/termini_1415_v01.2.shp
+./2016.02.02/termini_1516_v01.2.shp
+./2017.02.01/termini_1617_v01.2.shp
+#+end_example
+
+
+
+** Download
+
++ A new datalad empty dataset is created
++ Datalad is used to download data (via the cryo-data-download.{sh,py} scripts)
++ See https://github.com/cryo-data/bin/blob/main/download.sh
+  
+#+BEGIN_SRC bash
+log_info "Building dataset"
+datalad create -d . -D "template" --force
+git add cryo-data.meta cryo-data-download.sh # should maybe be in ".cryo-data" sub-folder?
+git commit cryo-data.meta cryo-data-download.sh -m "cryo-data meta and download"
+if [[ -e cryo-data-download.sh ]]; then ./cryo-data-download.sh; fi
+if [[ -e cryo-data-download.py ]]; then ./cryo-data-download.py; fi
+datalad save -m "Download"
+#+END_SRC
+
+** Upload
+
++ The datalad dataset is uploaded to GitHub (that is, not the data, just the references to its original location)
++ See https://github.com/cryo-data/bin/blob/main/upload.sh
+
+#+BEGIN_SRC bash
+name=$(grep "^cryo-data name" cryo-data.meta | cut -d"|" -f2 | tr -d " ")
+gh repo create --public -d "${name}" cryo-data/${name}
+git remote add origin git@github.com:cryo-data/${name}
+git push -u origin main
+datalad push
+#+END_SRC
+
+** Configure
+
++ See https://github.com/cryo-data/bin/blob/main/configure.sh
++ The datalad dataset is downloaded into the =database=
++ The datalad dataset is downloaded into any other aka folders
++ The updated =database= and aka folders are pushed to GitHub
+
+#+BEGIN_SRC bash
+# make child of database
+cd ./database
+datalad clone -D $name https://github.com/cryo-data/${name}
+datalad save -r
+datalad push --to origin
+cd ..
+
+# make child of all akas
+for key in $(yq '.aka | keys' ${dir}/cryo-data.yaml | cut -d" " -f2); do
+  val=$(yq ".aka.${key}" ${dir}/cryo-data.yaml)
+  if [[ ${val} == "" ]]; then continue; fi
+  log_info "Linking ${name} to ${key}/${val}"
+  datalad clone -D ${name} https://github.com/cryo-data/${name} ${key}/${val}
+  datalad save -r
+done
+datalad push -r --to origin
+#+END_SRC
+

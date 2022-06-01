@@ -4,10 +4,6 @@
 - [[#instructions][Instructions]]
   - [[#install-datalad][Install datalad]]
   - [[#use][Use]]
-  - [[#contribute][Contribute]]
-- [[#details][Details]]
-  - [[#use-1][Use]]
-  - [[#build][Build]]
 - [[#cite][Cite]]
   - [[#datalad][Datalad]]
 
@@ -23,210 +19,34 @@
 ** Install datalad
 
 To access the data, you need to install [[https://www.datalad.org/][datalad]].
++ General install instructions: https://www.datalad.org/#install
 
 + Linux
   + =sudo apt install datalad= is the easiest way, but may give an older version
-  + =conda install datalad=, or =mamba install datalad= (just like conda, but in C++ hence much faster), or something similar in your favorite Python environment manager will provide the latest version
+  + =conda install datalad=, or =mamba install datalad= or something similar in your favorite Python environment manager will provide the latest version
 + OS X
-  + TODO
+  + See https://www.datalad.org/#install
 + Windows
   + See https://handbook.datalad.org/en/latest/intro/windows.html
   + We suggest using WSL, the Windows Subsystem for Linux.
 
-
 ** Use
 
+To download the complete cryo-data data set as 'empty' files:
 #+BEGIN_SRC bash
-git clone https://github.com/cryo-data/cryo-data # install this repository
-cd cryo-data
-./cryo-data.sh . # install datalad datasets
+datalad install -r https://github.com/cryo-data/cryo-data
 #+END_SRC
 
-When you find a specific file you want to actually download and use, then
-
+You can then download the actual data for an individual file or product with
 #+BEGIN_SRC bash
 datalad get path/to/file
-datalad get -r author/someone_yyyy # example
+datalad get -r author/someone_yyyy
+datalad get -r cryo-data/data_provider/NSIDC/0642/
 #+END_SRC
 
 See https://docs.datalad.org/en/stable/generated/man/datalad-get.html for more details.
 
 To free up space after downloading files, use =datalad drop=. See https://docs.datalad.org/en/stable/generated/man/datalad-drop.html.
-
-** Contribute
-
-A dataset can be contributed in a variety of different ways, ranging from an email asking for inclusion, to pull requests on final products. Requirements for inclusion are:
-
-*** Minimum contribution
-
-+ URL of the folder or data files.
-+ Data must be publicly available via FTP, HTTP, or other common protocols
-+ Metadata, similar to the following table.
-+ 
-| cryo-data name | some_descriptive_name                |
-| DOI            | 10.xxxx/nnnn                         |
-| author         | author_yyyy                          |
-| project        | MEasURES/some_other_descriptive_name |
-| product        | BedMachine                           |
-| repository     | NSIDC/424242                         |
-| misc           | only_if_other_fields_empty           |
-
-+ Our metadata standards and requirements are subject to change, but for this first version,
-  + =cryo-data name= is required. Some descriptive name or random character string. This name must be a valid filename acceptable to both modern OSes (e.g. cannot include forward-slash, which is a folder separator) and to GitHub as a repository name.
-  + No other fields are required, but they do make data discovery easier.
-
-* Details
-
-** Use
-
-Usage is wrapped in the [[./cryo-data.sh]] script. This script performs two tasks. 1) Download and install the cryo-data db and 2) Build links using the metadata so that data is easier to browse and find.
-
-The cryo-data db is downloaded with:
-
-#+BEGIN_SRC bash
-datalad clone https://github.com/cryo-data/db # fetch database
-cd db
-datalad get -rn * # get links to all the files (not the actual data)
-datalad get -r # get ALL THE DATA - probably not a good idea
-#+END_SRC
-
-+ After fetching the =db=, links into the db are generated using each datasets metadata.
-+ These links organize datasets by =author=, =project=, =product=, =repository=, =org=, and =misc=.
-  + The same dataset may appear in multiple locations for ease of access
-  + It does not take up additional disk space
-+ The final cryo-data archive may look something like:
-
-#+BEGIN_SRC
-$ tree -d
-.
-├── db        # top level database
-│   ├── some_dataset
-│   ├── some_other_datasat
-├── author    # datasets organized by author
-│   ├── some_yyyy # same as db/some_dataset
-│   └── other_yyyy
-├── org
-│   └── NSIDC
-│       └── nnnn # same as db/some_dataset
-├── project
-│   └── MEaSURES
-│       └── really_long_name_describing_product # same as db/some_dataset
-└── repository
-    ├── NSIDC
-    │   └── nnnn # same as db/some_dataset
-    └── pangaea
-        └── 424242 # same as db/some_other_dataset
-#+END_SRC
-
-** Build
-
-*** Steps
-
-A new dataset is ingested using the following general steps:
-1. Download
-   1. A new datalad empty dataset is created
-   2. Datalad is used to download data
-2. Upload
-   1. The datalad dataset is uploaded to GitHub (that is, not the data, just the references to its original location)
-3. Configure
-   1. The datalad dataset is downloaded into the development db =db.dev=
-   2. The updated =db.dev= is pushed to GitHub
-
-In more detail...
-
-*** Setup
-
-An =intake= folder is created for each dataset, containing two files:
-
-1. cryo-data.meta
-
-#+BEGIN_SRC bash :exports results :results verbatim
-cat template/cryo-data.meta
-#+END_SRC
-
-#+RESULTS:
-: cryo-data name| template
-: DOI | 
-: author | author_yyyy
-: project | 
-: product | 
-: repository | 
-: misc | template
-
-2. cryo-data-download.{sh,py}
-
-#+BEGIN_SRC bash :exports results :results verbatim
-cat template/cryo-data-download.sh
-#+END_SRC
-
-#+RESULTS:
-: #!/usr/bin/env bash
-: 
-: # can be more involved, e.g. wrapping download-url in a wget spyder
-: # See also https://docs.datalad.org/en/stable/generated/man/datalad-addurls.html
-: datalad download-url https://filesamples.com/samples/document/txt/sample1.txt
-: 
-
-*** Download
-
-+ A new datalad empty dataset is created
-+ Datalad is used to download data (via the cryo-data-download.{sh,py} scripts)
-
-#+BEGIN_SRC bash
-log_info "Building dataset"
-datalad create -d . -D "template" --force
-git add cryo-data.meta cryo-data-download.sh # should maybe be in ".cryo-data" sub-folder?
-git commit cryo-data.meta cryo-data-download.sh -m "cryo-data meta and download"
-if [[ -e cryo-data-download.sh ]]; then ./cryo-data-download.sh; fi
-if [[ -e cryo-data-download.py ]]; then ./cryo-data-download.py; fi
-#+END_SRC
-
-*** Upload
-
-+ The datalad dataset is uploaded to GitHub (that is, not the data, just the references to its original location)
-
-#+BEGIN_SRC bash
-name=$(grep "^cryo-data name" cryo-data.meta | cut -d"|" -f2 | tr -d " ")
-gh repo create --public -d "${name}" cryo-data/${name}
-git remote add origin git@github.com:cryo-data/${name}
-git push -u origin main
-datalad push
-#+END_SRC
-
-*** Configure
-
-+ The datalad dataset is downloaded into the development db =db.dev=
-+ The updated =db.dev= is pushed to GitHub
-
-#+BEGIN_SRC bash
-cd ./db.dev
-datalad clone -D $name https://github.com/cryo-data/${name}
-datalad save -r
-datalad push --to origin
-#+END_SRC
-
-*** Use
-
-As above, the dataset is used with:
-
-#+BEGIN_SRC bash
-datalad clone https://github.com/cryo-data/db # fetch database
-cd db
-datalad get -rn * # get links to all the files (not the actual data)
-#+END_SRC
-
-The links are build using the =cryo-data.meta= fields for each dataset, and =datalad clone=, from the local =db=.
-
-#+BEGIN_SRC bash
-for ds in ${dir}/db/*; do
-  for target in author project product repository org misc; do
-    dest=$(grep "^${target}" ${ds}/cryo-data.meta | cut -d"|" -f2 | tr -d " ") || echo ""
-    if [[ ${dest} == "" ]]; then continue; fi # no destination for this target.
-    if [[ -e ${target}/${dest} ]]; then continue; fi # already built
-    datalad clone ${ds} ${target}/${dest}
-  done
-done
-#+END_SRC
 
 
 * Cite
