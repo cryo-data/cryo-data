@@ -2,6 +2,7 @@
 - [[#minimum-contribution][Minimum contribution]]
 - [[#details][Details]]
   - [[#outline-of-steps][Outline of steps]]
+  - [[#requirements][Requirements]]
   - [[#setup][Setup]]
     - [[#cryo-datayaml][cryo-data.yaml]]
     - [[#cryo-data-downloadshpyext][cryo-data-download.{sh,py,ext}]]
@@ -56,15 +57,23 @@ Scripts to help with =download=, =upload=, and =configure= are in the [[https://
 
 In more detail...
 
+** Requirements
+
++ Recent version of datalad
++ yq: https://github.com/mikefarah/yq
+
 ** Setup
 
+0. Scripts from [[https://github.com/cryo-data/bin][cryo-data/bin]]
+
+   
 An =intake= folder is created for each dataset, containing two files:
 1. cryo-data.yaml
 2. cryo-data-download.{sh,py,ext}
 
 + Note :: It seems to work best if =intake= is not inside the cryo-data folder. This work should be done outside of the cryo-data git and datalad tree.
 + Note :: The [[./template]] folder can be used as a starting point.
-  
+
 *** cryo-data.yaml
 
 #+BEGIN_SRC bash :exports results :results verbatim
