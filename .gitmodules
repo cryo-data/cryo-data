@@ -12,3 +12,8 @@
 	url = git@github.com:cryo-data/data_provider
 	datalad-id = 8cb3661d-431f-494c-b8a2-30f51bbbaed5
 	datalad-url = git@github.com:cryo-data/data_provider
+[submodule "organization"]
+	path = organization
+	url = git@github.com:cryo-data/organization
+	datalad-id = 71aabd7c-b24b-422f-b395-e8f5c2c8c4d4
+	datalad-url = git@github.com:cryo-data/organization
