@@ -36,7 +36,6 @@ aka:
   + =cryo-data name= is required. Some descriptive name or random character string. This name must be a valid filename acceptable to both modern OSes (e.g. cannot include forward-slash, which is a folder separator) and to GitHub as a repository name.
   + No other fields are required, but they do make data discovery easier.
 
-
 * Details
 
 ** Outline of steps
@@ -67,9 +66,11 @@ In more detail...
 0. Scripts from [[https://github.com/cryo-data/bin][cryo-data/bin]]
 
    
-An =intake= folder is created for each dataset, containing two files:
-1. cryo-data.yaml
-2. cryo-data-download.{sh,py,ext}
++ An =intake= folder is created for each dataset.
++ The folder must contain a =cryo-data= sub-folder, based on the =template/cryo-data= folder
++ The =cryo-data= sub-folder contains:
+  + meta.yaml
+  + cryo-data-download.{sh,py,ext}
 
 + Note :: It seems to work best if =intake= is not inside the cryo-data folder. This work should be done outside of the cryo-data git and datalad tree.
 + Note :: The [[./template]] folder can be used as a starting point.
@@ -77,7 +78,7 @@ An =intake= folder is created for each dataset, containing two files:
 *** cryo-data.yaml
 
 #+BEGIN_SRC bash :exports results :results verbatim
-cat template/cryo-data.yaml
+cat template/cryo-data/meta.yaml
 #+END_SRC
 
 #+RESULTS:
@@ -86,22 +87,8 @@ cryo_data_name: descriptive_name_or_path_clean_DOI
 references:
   data:
     doi: nn.nnnn/nnn-nnn-nnnnn
-    bib: |-
-      @article{author_yyyy,
-        doi = {nnn/nnn-nnnnn},
-        year = {yyyy},
-        month = nn,
-        publisher = {Publisher},
-        volume = {42},
-        number = {42},
-        pages = {42},
-        author = {Last, First and Else, Someone}
-        title = {{T}itle with {F}ormatting}},
-        journal = {journal}
-      }
   science:
     doi: nn.nnn/nnn-nnnn-nnnnnn
-    bib:
 
 aka:
   author: author_yyyy
@@ -116,7 +103,7 @@ aka:
 A shell or python (or any other language) script that can call the appropriate datalad commands to download the data.
 
 #+BEGIN_SRC bash :exports results :results verbatim
-cat template/cryo-data-download.sh
+cat template/cryo-data/download.sh
 #+END_SRC
 
 #+RESULTS:
@@ -125,6 +112,7 @@ cat template/cryo-data-download.sh
 : # can be more involved, e.g. wrapping download-url in a wget spyder
 : # See also https://docs.datalad.org/en/stable/generated/man/datalad-addurls.html
 : datalad download-url https://filesamples.com/samples/document/txt/sample1.txt
+: 
 
 A more complicate example uses =wget= with login credentials to spider an NSIDC dataset with nested folders, then downloads each of the files preserving a specific folder level. The script is:
 #+BEGIN_SRC bash
