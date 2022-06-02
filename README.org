@@ -14,6 +14,14 @@
 + A meta-portal is a data portal that doesn't exist, but links instead to 3rd-party portals where the data resides.
 + Our goal is a single point of access for all data you might want to download.
 
+#+BEGIN_html
+<br>
+<a href="https://xkcd.com/927/">
+  <p align="center">
+    <img src="https://imgs.xkcd.com/comics/standards.png">
+  </p>
+</a>
+#+END_html
 
 * Instructions
 
