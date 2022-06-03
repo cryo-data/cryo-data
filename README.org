@@ -3,7 +3,7 @@
 - [[#introduction][Introduction]]
 - [[#instructions][Instructions]]
   - [[#install-datalad][Install datalad]]
-  - [[#use][Use]]
+  - [[#install-cryo-data][Install cryo-data]]
   - [[#contribute][Contribute]]
 - [[#cite][Cite]]
   - [[#datalad][Datalad]]
@@ -24,14 +24,16 @@
 #+END_html
 
 * Instructions
-
 ** Install datalad
 
 To access the data, you need to install [[https://www.datalad.org/][datalad]].
 + General install instructions: https://www.datalad.org/#install
 
-+ Linux
++ Ubuntu Linux
   + =sudo apt install datalad= is the easiest way, but may give an older version
++ Arch Linux
+  + =yay -S python-datalad=
++ Generic Linux with Conda
   + =conda install datalad=, or =mamba install datalad= or something similar in your favorite Python environment manager will provide the latest version
 + OS X
   + See https://www.datalad.org/#install
@@ -39,8 +41,7 @@ To access the data, you need to install [[https://www.datalad.org/][datalad]].
   + See https://handbook.datalad.org/en/latest/intro/windows.html
   + We suggest using WSL, the Windows Subsystem for Linux.
 
-** Use
-
+** Install cryo-data
 *** First use
 To download the complete cryo-data data set as 'empty' files:
 #+BEGIN_SRC bash
@@ -49,9 +50,9 @@ datalad install -r https://github.com/cryo-data/cryo-data
 
 You can then download the actual data for an individual file or product with
 #+BEGIN_SRC bash
-datalad get path/to/file
-datalad get -r author/someone_yyyy
-datalad get -r cryo-data/data_provider/NSIDC/0642/
+datalad get path/to/file                            # get one file
+datalad get -r author/someone_yyyy                  # get all files associated with one paper
+datalad get -r cryo-data/data_provider/NSIDC/0642/  # get all files from provider dataset
 #+END_SRC
 
 See https://docs.datalad.org/en/stable/generated/man/datalad-get.html for more details.
@@ -66,7 +67,7 @@ datalad update --merge -r .
 
 *** Remove downloaded files
 
-To free up space after downloading files, use =datalad drop=. See https://docs.datalad.org/en/stable/generated/man/datalad-drop.html.
+To free up space after downloading the data file contents, use =datalad drop=. See https://docs.datalad.org/en/stable/generated/man/datalad-drop.html.
 
 
 ** Contribute
