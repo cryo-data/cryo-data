@@ -26,4 +26,4 @@
 	path = other
 	url = git@github.com:cryo-data/other
 	datalad-id = ce70a17a-eec0-4a11-b6cc-a52f88d331df
-	datalad-url = git@github.com:cryo-data/other
+	datalad-url = https://github.com/cryo-data/other
