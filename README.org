@@ -70,6 +70,20 @@ datalad update --merge -r .
 To free up space after downloading the data file contents, use =datalad drop=. See https://docs.datalad.org/en/stable/generated/man/datalad-drop.html.
 
 
+*** Advanced usage
+
++ Any datalad dataset can be a child of another dataset
++ Any datalad child can be pruned from the tree/folder structure and considered as the top-level dataset
+
+You can exploit the latter of these two features to check out only a subset of cryo-data. The following clones one author, and all NSIDC data
+
+#+BEGIN_SRC bash :exports code
+datalad install -r https://github.com/cryo-data/author/someone_yyyy
+datalad install -r https://github.com/cryo-data/author/data_provider/NSIDC 
+#+END_SRC
+
+However, =install= or =clone= do not take up any disk space. Only =get= downloads the file contents and uses disk space, so you can =install= everything and only =get= the subset you want, as shown further up in this document.
+
 ** Contribute
 
 See [[./CONTRIBUTING.org]]
